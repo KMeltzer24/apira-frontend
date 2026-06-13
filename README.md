@@ -2,7 +2,7 @@
 
 React (Vite) web app for the [Apira](https://github.com/KMeltzer24/apira) backend. Login and portfolio screens call the EC2-hosted User Service and Portfolio Service over HTTP.
 
-The UI runs locally on your Mac. The APIs run on EC2 only — there is no local backend.
+Runs on your Mac in Docker. The APIs run on EC2 only — there is no local backend.
 
 **Backend repo:** https://github.com/KMeltzer24/apira
 
@@ -22,15 +22,23 @@ VITE_PORTFOLIO_SERVICE_URL=http://<EC2_PUBLIC_IP>:8002
 ## Run
 
 ```bash
-npm install
-npm run dev
+docker compose up -d --build
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## Docker (optional)
+## Useful commands
 
 ```bash
-cp .env.example .env   # required — set EC2 URLs
+docker compose ps          # status
+docker compose logs -f     # live logs
+docker compose down        # stop
+```
+
+After changing `.env`, rebuild and restart:
+
+```bash
 docker compose up -d --build
 ```
+
+`package.json` is used inside the Docker image only — you do not need Node or npm installed on your Mac.

@@ -11,7 +11,7 @@ function ConfigError() {
         Copy <code>.env.example</code> to <code>.env</code> and set{' '}
         <code>VITE_USER_SERVICE_URL</code> and{' '}
         <code>VITE_PORTFOLIO_SERVICE_URL</code> to your EC2 backend URLs, then
-        restart the dev server.
+        run <code>docker compose up -d --build</code>.
       </p>
     </div>
   )
