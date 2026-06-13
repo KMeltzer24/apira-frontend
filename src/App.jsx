@@ -1,9 +1,21 @@
 import { useState } from 'react'
 
-const USER_SERVICE_URL =
-  import.meta.env.VITE_USER_SERVICE_URL ?? 'http://localhost:8001'
-const PORTFOLIO_SERVICE_URL =
-  import.meta.env.VITE_PORTFOLIO_SERVICE_URL ?? 'http://localhost:8002'
+const USER_SERVICE_URL = import.meta.env.VITE_USER_SERVICE_URL
+const PORTFOLIO_SERVICE_URL = import.meta.env.VITE_PORTFOLIO_SERVICE_URL
+
+function ConfigError() {
+  return (
+    <div className="card">
+      <h1>Configuration required</h1>
+      <p className="error">
+        Copy <code>.env.example</code> to <code>.env</code> and set{' '}
+        <code>VITE_USER_SERVICE_URL</code> and{' '}
+        <code>VITE_PORTFOLIO_SERVICE_URL</code> to your EC2 backend URLs, then
+        restart the dev server.
+      </p>
+    </div>
+  )
+}
 
 function LoginScreen({ onLogin }) {
   const [username, setUsername] = useState('')
@@ -128,6 +140,14 @@ function PortfolioScreen({ user, onLogout }) {
 
 export default function App() {
   const [user, setUser] = useState(null)
+
+  if (!USER_SERVICE_URL || !PORTFOLIO_SERVICE_URL) {
+    return (
+      <div className="app">
+        <ConfigError />
+      </div>
+    )
+  }
 
   return (
     <div className="app">
