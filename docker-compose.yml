@@ -1,0 +1,8 @@
+services:
+  frontend:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_USER_SERVICE_URL=${VITE_USER_SERVICE_URL}
+      - VITE_PORTFOLIO_SERVICE_URL=${VITE_PORTFOLIO_SERVICE_URL}
