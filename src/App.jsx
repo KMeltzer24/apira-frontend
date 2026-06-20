@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 const USER_SERVICE_URL = import.meta.env.VITE_USER_SERVICE_URL
 const PORTFOLIO_SERVICE_URL = import.meta.env.VITE_PORTFOLIO_SERVICE_URL
+const AGENT_URL = import.meta.env.VITE_AGENT_URL
 
 function ConfigError() {
   return (
@@ -138,7 +139,79 @@ function PortfolioScreen({ user, onLogout }) {
   )
 }
 
+function ChatScreen() {
+  const [message, setMessage] = useState('')
+  const [reply, setReply] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!message.trim()) return
+    setError('')
+    setReply('')
+    setLoading(true)
+    try {
+      const res = await fetch(`${AGENT_URL}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message }),
+      })
+      if (!res.ok) throw new Error(`Request failed (${res.status})`)
+      const data = await res.json()
+      setReply(data.reply)
+    } catch (err) {
+      setError(err.message || 'Could not reach the agent')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (!AGENT_URL) {
+    return (
+      <div className="card">
+        <h1>Agent Chat</h1>
+        <p className="error">
+          Set <code>VITE_AGENT_URL</code> in <code>.env</code> to the agent API
+          (e.g. <code>http://localhost:8100</code>) and start the agent server.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="card">
+      <h1>Agent Chat</h1>
+      <form className="form" onSubmit={handleSubmit}>
+        <label className="field">
+          <span>Your message</span>
+          <textarea
+            className="chat-input"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="e.g. Log in as alice (password: password) and show my portfolio"
+            rows={3}
+            autoFocus
+          />
+        </label>
+        <button type="submit" className="btn primary" disabled={loading}>
+          {loading ? 'Thinking…' : 'Send'}
+        </button>
+        {error && <p className="error">{error}</p>}
+      </form>
+
+      <label className="field chat-output-field">
+        <span>Agent response</span>
+        <div className="chat-output">
+          {reply ? reply : <span className="chat-placeholder">The agent's reply will appear here.</span>}
+        </div>
+      </label>
+    </div>
+  )
+}
+
 export default function App() {
+  const [view, setView] = useState('portfolio')
   const [user, setUser] = useState(null)
 
   if (!USER_SERVICE_URL || !PORTFOLIO_SERVICE_URL) {
@@ -151,11 +224,32 @@ export default function App() {
 
   return (
     <div className="app">
-      {user ? (
-        <PortfolioScreen user={user} onLogout={() => setUser(null)} />
-      ) : (
-        <LoginScreen onLogin={setUser} />
-      )}
+      <div className="shell">
+        <nav className="nav">
+          <button
+            className={`tab ${view === 'portfolio' ? 'active' : ''}`}
+            onClick={() => setView('portfolio')}
+          >
+            Portfolio
+          </button>
+          <button
+            className={`tab ${view === 'chat' ? 'active' : ''}`}
+            onClick={() => setView('chat')}
+          >
+            Agent Chat
+          </button>
+        </nav>
+
+        {view === 'portfolio' ? (
+          user ? (
+            <PortfolioScreen user={user} onLogout={() => setUser(null)} />
+          ) : (
+            <LoginScreen onLogin={setUser} />
+          )
+        ) : (
+          <ChatScreen />
+        )}
+      </div>
     </div>
   )
 }

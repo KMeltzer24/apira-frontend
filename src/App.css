@@ -123,3 +123,80 @@
   color: var(--text-h);
   font-size: 16px;
 }
+
+.shell {
+  width: 100%;
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.nav {
+  display: flex;
+  gap: 8px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.tab {
+  flex: 1;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.tab.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.shell .card {
+  max-width: none;
+}
+
+.chat-input {
+  font: inherit;
+  font-size: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text-h);
+  outline: none;
+  resize: vertical;
+}
+
+.chat-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.chat-output-field {
+  margin-top: 20px;
+}
+
+.chat-output {
+  min-height: 120px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--social-bg);
+  color: var(--text-h);
+  font-size: 16px;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.chat-placeholder {
+  color: var(--text);
+  opacity: 0.6;
+}
