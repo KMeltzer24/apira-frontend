@@ -1,52 +1,57 @@
 # How the Frontend Works
 
-The Apira frontend is **one React app with two pages**, switched by a nav bar at the top:
+A React (Vite) single-page app with two views selected by a top nav bar. Each view is an independent screen that calls a different backend; they share no state.
 
-| Page | What it does | Talks to |
-|------|--------------|----------|
-| **Portfolio** | Login, then view your holdings | EC2 backend (`:8001` / `:8002`) |
-| **Agent Chat** | Type a message, get an answer | The local agent API (`:8100`) |
-
-The two pages are independent — switching tabs just swaps which screen is shown. The Portfolio page does not use the agent, and the chat page does not use the EC2 APIs.
+| View | Purpose | Backend | Transport |
+|------|---------|---------|-----------|
+| **Portfolio** | Login, then list holdings | EC2 user-service (`:8001`), portfolio-service (`:8002`) | REST/JSON |
+| **Agent Chat** | Send a prompt, render the reply | apira-agent API (`:8100`, local) | REST/JSON |
 
 ---
 
-## How a page "talks to" a server
+## Structure
 
-Every page does the same basic thing: the browser makes an HTTP request to a URL and shows the response. The only difference between pages is **which URL** they call.
+`src/App.jsx` holds the whole UI. `App` keeps two pieces of state:
 
-The URLs come from `.env` (read at build time):
+- `view` — `'portfolio'` or `'chat'`, toggled by the nav buttons
+- `user` — the logged-in user for the Portfolio view (unchanged from the original app)
+
+Components:
+
+| Component | Responsibility |
+|-----------|----------------|
+| `LoginScreen` | `POST /login`, lift `user_id` to `App` |
+| `PortfolioScreen` | `GET /portfolio?user_id=`, render holdings |
+| `ChatScreen` | `POST /chat`, render the agent's reply |
+| `ConfigError` | Shown if the EC2 service URLs are missing |
+
+## Configuration
+
+Service URLs are injected at build time from `.env` via Vite's `import.meta.env`:
 
 ```bash
-VITE_USER_SERVICE_URL=http://<EC2_PUBLIC_IP>:8001   # Portfolio: login
-VITE_PORTFOLIO_SERVICE_URL=http://<EC2_PUBLIC_IP>:8002  # Portfolio: holdings
-VITE_AGENT_URL=http://localhost:8100                # Agent Chat
+VITE_USER_SERVICE_URL=http://<EC2_PUBLIC_IP>:8001
+VITE_PORTFOLIO_SERVICE_URL=http://<EC2_PUBLIC_IP>:8002
+VITE_AGENT_URL=http://localhost:8100
 ```
 
-Note the chat URL is `localhost`, not EC2 — the agent runs on your Mac because it needs a local LLM (Ollama).
+`VITE_AGENT_URL` points at `localhost` because the agent runs on your Mac (it needs a local Ollama model), unlike the portfolio APIs which are on EC2.
 
 ---
 
-## Portfolio page
+## Portfolio view
 
-1. You enter a username/password and hit **Login**.
-2. The browser sends `POST /login` to the user service.
-3. On success it gets back a `user_id`.
-4. **View My Portfolio** sends `GET /portfolio?user_id=...` to the portfolio service.
-5. The holdings are listed on screen.
+1. `LoginScreen` submits `POST {VITE_USER_SERVICE_URL}/login` with `{ username, password }`.
+2. On `success`, the returned `user_id` is stored in `App` state.
+3. `PortfolioScreen` calls `GET {VITE_PORTFOLIO_SERVICE_URL}/portfolio?user_id=<id>` and renders `holdings`.
 
-This is the original flow and is unchanged.
+This is the original flow and is unchanged by the chat feature.
 
 ---
 
-## Agent Chat page
+## Agent Chat view
 
-1. You type a message and hit **Send**.
-2. The browser sends `POST /chat` to the agent API with your text.
-3. The agent (a separate program) logs in and fetches the portfolio using its tools, then replies with text.
-4. The reply appears in the output box.
-
-The actual request is a single `fetch`:
+`ChatScreen` is a controlled form: a textarea for the prompt and a read-only output area for the reply. On submit it issues one request:
 
 ```javascript
 const res = await fetch(`${AGENT_URL}/chat`, {
@@ -58,26 +63,30 @@ const data = await res.json()
 setReply(data.reply)
 ```
 
-The agent itself lives in a separate repo, [apira-agent](https://github.com/KMeltzer24/apira-agent). This frontend only sends text and shows the answer — it knows nothing about how the agent works.
+The response shape is `{ "reply": string }`. Loading and error states are handled locally in the component. If `VITE_AGENT_URL` is unset, the view renders a configuration hint instead of the form.
+
+The frontend has no knowledge of how the agent produces its answer — it sends text and renders text. The agent (LangGraph + Ollama, calling the MCP tools) lives in [apira-agent](https://github.com/KMeltzer24/apira-agent); this app is just an HTTP client of its `/chat` endpoint.
 
 ---
 
-## Running it
+## Running
 
 ```bash
-docker compose up -d --build      # serves the app at http://localhost:3000
+docker compose up -d --build      # serves at http://localhost:3000
 ```
 
-- The **Portfolio** page works as long as EC2 is up.
-- The **Agent Chat** page also needs the agent server running locally:
+`package.json` is used only inside the Docker image — Node/npm are not required on the host.
+
+- **Portfolio** works whenever EC2 is reachable.
+- **Agent Chat** also requires the local agent server:
   ```bash
   # in the apira-agent repo
   uvicorn server:app --host 127.0.0.1 --port 8100
   ```
-  If the agent server is not running, the chat page will show a connection error; the Portfolio page still works.
+  Without it, the chat view shows a connection error while the Portfolio view continues to work.
 
 ---
 
-## Why the chat needs a separate server
+## Separation of concerns
 
-The frontend can only talk to things over HTTP. The agent was originally a terminal script, so it had no web address. The [apira-agent](https://github.com/KMeltzer24/apira-agent) repo adds a small server (`/chat` endpoint) that gives the agent a web address this page can call. The frontend (UI) and the agent server (backend) stay in separate repos — the same client/server split as the Portfolio page and the EC2 backend.
+The chat feature follows the same client/server split as the rest of the project: the UI lives here (frontend), and the agent server lives in [apira-agent](https://github.com/KMeltzer24/apira-agent) (backend). The frontend only ever speaks HTTP to its backends; it contains no agent, model, or MCP logic.
