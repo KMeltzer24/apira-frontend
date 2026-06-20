@@ -7,6 +7,8 @@ React (Vite) web app for the [Apira](https://github.com/KMeltzer24/apira) backen
 
 Runs on your Mac in Docker. The portfolio APIs run on EC2 only — there is no local backend.
 
+**How it works:** [docs/how-the-frontend-works.md](docs/how-the-frontend-works.md) — the two pages and how each talks to its server.
+
 **Backend repo:** https://github.com/KMeltzer24/apira
 
 **MCP server (separate repo):** [apira-mcp](https://github.com/KMeltzer24/apira-mcp) — AI tool layer on EC2; this frontend calls the APIs directly and does not use MCP.
