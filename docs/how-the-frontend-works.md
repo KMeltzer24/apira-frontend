@@ -5,7 +5,7 @@ A React (Vite) single-page app with two views selected by a top nav bar. Each vi
 | View | Purpose | Backend | Transport |
 |------|---------|---------|-----------|
 | **Portfolio** | Login, then list holdings | EC2 user-service (`:8001`), portfolio-service (`:8002`) | REST/JSON |
-| **Agent Chat** | Send a prompt, render the reply | apira-agent API (`:8100`, local) | REST/JSON |
+| **Agent Chat** | Send a prompt, render the reply | apira-agent API on EC2 (`:8100`) | REST/JSON |
 
 ---
 
@@ -32,10 +32,10 @@ Service URLs are injected at build time from `.env` via Vite's `import.meta.env`
 ```bash
 VITE_USER_SERVICE_URL=http://<EC2_PUBLIC_IP>:8001
 VITE_PORTFOLIO_SERVICE_URL=http://<EC2_PUBLIC_IP>:8002
-VITE_AGENT_URL=http://localhost:8100
+VITE_AGENT_URL=http://<EC2_PUBLIC_IP>:8100
 ```
 
-`VITE_AGENT_URL` points at `localhost` because the agent runs on your Mac (it needs a local Ollama model), unlike the portfolio APIs which are on EC2.
+All three point at EC2: the agent is deployed there too (it uses the Gemini API, so it needs no local model).
 
 ---
 
@@ -77,13 +77,7 @@ docker compose up -d --build      # serves at http://localhost:3000
 
 `package.json` is used only inside the Docker image — Node/npm are not required on the host.
 
-- **Portfolio** works whenever EC2 is reachable.
-- **Agent Chat** also requires the local agent server. The simplest way is Docker in the apira-agent repo:
-  ```bash
-  # in the apira-agent repo
-  docker compose up -d --build      # restarts automatically; reaches host Ollama
-  ```
-  (Or run it directly: `uvicorn server:app --host 127.0.0.1 --port 8100`.) Without it, the chat view shows a connection error while the Portfolio view continues to work.
+Both pages work whenever EC2 is reachable — the portfolio APIs, MCP server, and agent are all deployed there. No local server is required.
 
 ---
 

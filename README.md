@@ -3,9 +3,9 @@
 React (Vite) web app for the [Apira](https://github.com/KMeltzer24/apira) backend. Two pages:
 
 - **Portfolio** — login + portfolio screens that call the EC2-hosted User Service and Portfolio Service over HTTP.
-- **Agent Chat** — an input/output chat box that talks to the [apira-agent](https://github.com/KMeltzer24/apira-agent) API (a LangGraph + Ollama agent). The agent runs locally on your Mac, so this page needs the agent server running.
+- **Agent Chat** — an input/output chat box that talks to the [apira-agent](https://github.com/KMeltzer24/apira-agent) API (a LangGraph agent), deployed on EC2 (port 8100).
 
-Runs on your Mac in Docker. The portfolio APIs run on EC2 only — there is no local backend.
+Runs on your Mac in Docker. The portfolio APIs and the agent both run on EC2 — there is no local backend.
 
 **How it works:** [docs/how-the-frontend-works.md](docs/how-the-frontend-works.md) — the two pages and how each talks to its server.
 
@@ -26,10 +26,10 @@ Edit `.env` and set your EC2 public IP (and the local agent URL for the chat pag
 ```bash
 VITE_USER_SERVICE_URL=http://<EC2_PUBLIC_IP>:8001
 VITE_PORTFOLIO_SERVICE_URL=http://<EC2_PUBLIC_IP>:8002
-VITE_AGENT_URL=http://localhost:8100
+VITE_AGENT_URL=http://<EC2_PUBLIC_IP>:8100
 ```
 
-The Agent Chat page only works while the apira-agent server is running locally. The simplest way is `docker compose up -d --build` in the [apira-agent](https://github.com/KMeltzer24/apira-agent) repo (it auto-restarts and reaches host Ollama). The Portfolio page works without it.
+The Agent Chat page calls the [apira-agent](https://github.com/KMeltzer24/apira-agent) API on EC2. Both pages work as long as EC2 is up; no local server is required.
 
 ## Run
 
