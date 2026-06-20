@@ -6,6 +6,8 @@ Runs on your Mac in Docker. The APIs run on EC2 only — there is no local backe
 
 **Backend repo:** https://github.com/KMeltzer24/apira
 
+**MCP server (separate repo):** [apira-mcp](https://github.com/KMeltzer24/apira-mcp) — AI tool layer on EC2; this frontend calls the APIs directly and does not use MCP.
+
 ## Setup
 
 ```bash
