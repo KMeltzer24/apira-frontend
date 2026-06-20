@@ -65,7 +65,7 @@ setReply(data.reply)
 
 The response shape is `{ "reply": string }`. Loading and error states are handled locally in the component. If `VITE_AGENT_URL` is unset, the view renders a configuration hint instead of the form.
 
-The frontend has no knowledge of how the agent produces its answer — it sends text and renders text. The agent (LangGraph + Ollama, calling the MCP tools) lives in [apira-agent](https://github.com/KMeltzer24/apira-agent); this app is just an HTTP client of its `/chat` endpoint.
+The frontend has no knowledge of how the agent produces its answer — it sends text and renders text. The agent (LangGraph + Gemini, calling the MCP tools) lives in [apira-agent](https://github.com/KMeltzer24/apira-agent); this app is just an HTTP client of its `/chat` endpoint.
 
 ---
 
