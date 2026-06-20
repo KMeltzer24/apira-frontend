@@ -29,7 +29,7 @@ VITE_PORTFOLIO_SERVICE_URL=http://<EC2_PUBLIC_IP>:8002
 VITE_AGENT_URL=http://localhost:8100
 ```
 
-The Agent Chat page only works while the apira-agent server is running locally (`uvicorn server:app --port 8100`). The Portfolio page works without it.
+The Agent Chat page only works while the apira-agent server is running locally. The simplest way is `docker compose up -d --build` in the [apira-agent](https://github.com/KMeltzer24/apira-agent) repo (it auto-restarts and reaches host Ollama). The Portfolio page works without it.
 
 ## Run
 

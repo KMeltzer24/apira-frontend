@@ -78,12 +78,12 @@ docker compose up -d --build      # serves at http://localhost:3000
 `package.json` is used only inside the Docker image — Node/npm are not required on the host.
 
 - **Portfolio** works whenever EC2 is reachable.
-- **Agent Chat** also requires the local agent server:
+- **Agent Chat** also requires the local agent server. The simplest way is Docker in the apira-agent repo:
   ```bash
   # in the apira-agent repo
-  uvicorn server:app --host 127.0.0.1 --port 8100
+  docker compose up -d --build      # restarts automatically; reaches host Ollama
   ```
-  Without it, the chat view shows a connection error while the Portfolio view continues to work.
+  (Or run it directly: `uvicorn server:app --host 127.0.0.1 --port 8100`.) Without it, the chat view shows a connection error while the Portfolio view continues to work.
 
 ---
 
