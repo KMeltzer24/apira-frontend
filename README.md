@@ -21,7 +21,7 @@ Runs on your Mac in Docker. The portfolio APIs and the agent both run on EC2 —
 cp .env.example .env
 ```
 
-Edit `.env` and set your EC2 public IP (and the local agent URL for the chat page):
+Edit `.env` and set your EC2 public IP (all three services run on EC2):
 
 ```bash
 VITE_USER_SERVICE_URL=http://<EC2_PUBLIC_IP>:8001
