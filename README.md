@@ -1,19 +1,20 @@
 # Apira Frontend
 
-React (Vite) web app for the [Apira](https://github.com/KMeltzer24/apira) backend. Two pages:
+React (Vite) web app for the [Apira](https://github.com/KMeltzer24/apira) backend. Three pages:
 
 - **Portfolio** — login + portfolio screens that call the EC2-hosted User Service and Portfolio Service over HTTP.
 - **Agent Chat** — an input/output chat box that talks to the [apira-agent](https://github.com/KMeltzer24/apira-agent) API (a LangGraph agent), deployed on EC2 (port 8100).
+- **Recommender** — triggers stock recommendations via the same agent API; the agent reads EC2 research files and suggests hold/add/trim actions.
 
 Runs on your Mac in Docker. The portfolio APIs and the agent both run on EC2 — there is no local backend.
 
-**How it works:** [docs/how-the-frontend-works.md](docs/how-the-frontend-works.md) — the two pages and how each talks to its server.
+**How it works:** [docs/how-the-frontend-works.md](docs/how-the-frontend-works.md) — the three pages and how each talks to its server.
 
 **Backend repo:** https://github.com/KMeltzer24/apira
 
 **MCP server (separate repo):** [apira-mcp](https://github.com/KMeltzer24/apira-mcp) — AI tool layer on EC2; this frontend calls the APIs directly and does not use MCP.
 
-**Agent (separate repo):** [apira-agent](https://github.com/KMeltzer24/apira-agent) — powers the Agent Chat page.
+**Agent (separate repo):** [apira-agent](https://github.com/KMeltzer24/apira-agent) — powers the Agent Chat and Recommender pages.
 
 ## Setup
 
@@ -29,7 +30,7 @@ VITE_PORTFOLIO_SERVICE_URL=http://<EC2_PUBLIC_IP>:8002
 VITE_AGENT_URL=http://<EC2_PUBLIC_IP>:8100
 ```
 
-The Agent Chat page calls the [apira-agent](https://github.com/KMeltzer24/apira-agent) API on EC2. Both pages work as long as EC2 is up; no local server is required.
+The Agent Chat and Recommender pages call the [apira-agent](https://github.com/KMeltzer24/apira-agent) API on EC2. All pages work as long as EC2 is up; no local server is required.
 
 ## Run
 

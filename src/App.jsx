@@ -4,6 +4,19 @@ const USER_SERVICE_URL = import.meta.env.VITE_USER_SERVICE_URL
 const PORTFOLIO_SERVICE_URL = import.meta.env.VITE_PORTFOLIO_SERVICE_URL
 const AGENT_URL = import.meta.env.VITE_AGENT_URL
 
+function buildRecommendationPrompt(username, password) {
+  return (
+    `Log in as user '${username}' with password '${password}'. ` +
+    `Retrieve their portfolio holdings. ` +
+    `Use searchLocalFolder to find stock research files for each ticker. ` +
+    `Respond with one entry per holding, in this exact format:\n\n` +
+    `**TICKER (Company)** — Hold / Add / Trim\n` +
+    `Files: filename1, filename2\n` +
+    `One or two short sentences of reasoning.\n\n` +
+    `Keep it concise. No sector overview. No bullet lists of current holdings.`
+  )
+}
+
 function ConfigError() {
   return (
     <div className="card">
@@ -139,6 +152,99 @@ function PortfolioScreen({ user, onLogout }) {
   )
 }
 
+function StockRecommenderScreen() {
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [reply, setReply] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!username.trim() || !password.trim()) return
+    setError('')
+    setReply('')
+    setLoading(true)
+    try {
+      const res = await fetch(`${AGENT_URL}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: buildRecommendationPrompt(username, password),
+        }),
+      })
+      if (!res.ok) throw new Error(`Request failed (${res.status})`)
+      const data = await res.json()
+      setReply(data.reply)
+    } catch (err) {
+      setError(err.message || 'Could not reach the agent')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (!AGENT_URL) {
+    return (
+      <div className="card">
+        <h1>Stock Recommender</h1>
+        <p className="error">
+          Set <code>VITE_AGENT_URL</code> in <code>.env</code> to the agent API
+          (e.g. <code>http://&lt;EC2_PUBLIC_IP&gt;:8100</code>) and redeploy the
+          frontend.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="card">
+      <h1>Stock Recommender</h1>
+      <p className="hint">
+        The agent logs in, reads your portfolio, searches EC2 research files,
+        and recommends hold / add / trim actions.
+      </p>
+      <form className="form" onSubmit={handleSubmit}>
+        <label className="field">
+          <span>Username</span>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="e.g. alice"
+            autoFocus
+          />
+        </label>
+        <label className="field">
+          <span>Password</span>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="e.g. password"
+          />
+        </label>
+        <button type="submit" className="btn primary" disabled={loading}>
+          {loading ? 'Analyzing…' : 'Get Recommendations'}
+        </button>
+        {error && <p className="error">{error}</p>}
+      </form>
+
+      <label className="field chat-output-field">
+        <span>Recommendations</span>
+        <div className="chat-output">
+          {reply ? (
+            reply
+          ) : (
+            <span className="chat-placeholder">
+              Recommendations will appear here after you submit.
+            </span>
+          )}
+        </div>
+      </label>
+    </div>
+  )
+}
+
 function ChatScreen() {
   const [message, setMessage] = useState('')
   const [reply, setReply] = useState('')
@@ -238,6 +344,12 @@ export default function App() {
           >
             Agent Chat
           </button>
+          <button
+            className={`tab ${view === 'recommender' ? 'active' : ''}`}
+            onClick={() => setView('recommender')}
+          >
+            Recommender
+          </button>
         </nav>
 
         {view === 'portfolio' ? (
@@ -246,8 +358,10 @@ export default function App() {
           ) : (
             <LoginScreen onLogin={setUser} />
           )
-        ) : (
+        ) : view === 'chat' ? (
           <ChatScreen />
+        ) : (
+          <StockRecommenderScreen />
         )}
       </div>
     </div>

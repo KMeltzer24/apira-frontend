@@ -1,11 +1,12 @@
 # How the Frontend Works
 
-A React (Vite) single-page app with two views selected by a top nav bar. Each view is an independent screen that calls a different backend; they share no state.
+A React (Vite) single-page app with three views selected by a top nav bar. Each view is an independent screen that calls a different backend; they share no state.
 
 | View | Purpose | Backend | Transport |
 |------|---------|---------|-----------|
 | **Portfolio** | Login, then list holdings | EC2 user-service (`:8001`), portfolio-service (`:8002`) | REST/JSON |
 | **Agent Chat** | Send a prompt, render the reply | apira-agent API on EC2 (`:8100`) | REST/JSON |
+| **Recommender** | Trigger stock recommendations | apira-agent API on EC2 (`:8100`) | REST/JSON |
 
 ---
 
@@ -13,7 +14,7 @@ A React (Vite) single-page app with two views selected by a top nav bar. Each vi
 
 `src/App.jsx` holds the whole UI. `App` keeps two pieces of state:
 
-- `view` — `'portfolio'` or `'chat'`, toggled by the nav buttons
+- `view` — `'portfolio'`, `'chat'`, or `'recommender'`, toggled by the nav buttons
 - `user` — the logged-in user for the Portfolio view (unchanged from the original app)
 
 Components:
@@ -23,6 +24,7 @@ Components:
 | `LoginScreen` | `POST /login`, lift `user_id` to `App` |
 | `PortfolioScreen` | `GET /portfolio?user_id=`, render holdings |
 | `ChatScreen` | `POST /chat`, render the agent's reply |
+| `StockRecommenderScreen` | `POST /chat` with a structured recommendation prompt |
 | `ConfigError` | Shown if the EC2 service URLs are missing |
 
 ## Configuration
@@ -66,6 +68,16 @@ setReply(data.reply)
 The response shape is `{ "reply": string }`. Loading and error states are handled locally in the component. If `VITE_AGENT_URL` is unset, the view renders a configuration hint instead of the form.
 
 The frontend has no knowledge of how the agent produces its answer — it sends text and renders text. The agent (LangGraph + Gemini, calling the MCP tools) lives in [apira-agent](https://github.com/KMeltzer24/apira-agent); this app is just an HTTP client of its `/chat` endpoint.
+
+---
+
+## Stock Recommender view
+
+`StockRecommenderScreen` collects username and password. On submit it sends one `POST /chat` request with a structured prompt that tells the agent to log in, fetch the portfolio, call `searchLocalFolder` on EC2 research files, and return hold/add/trim recommendations.
+
+Like Agent Chat, this view is independent of the Portfolio tab — credentials are entered here, not reused from a Portfolio login session.
+
+Full feature write-up: [apira-mcp/docs/how-stock-recommender-works.md](https://github.com/KMeltzer24/apira-mcp/blob/main/docs/how-stock-recommender-works.md).
 
 ---
 
