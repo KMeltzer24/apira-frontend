@@ -47,7 +47,7 @@ All three point at EC2: the agent is deployed there too (it uses the Gemini API,
 2. On `success`, the returned `user_id` is stored in `App` state.
 3. `PortfolioScreen` calls `GET {VITE_PORTFOLIO_SERVICE_URL}/portfolio?user_id=<id>` and renders `holdings`.
 
-This is the original flow and is unchanged by the chat feature.
+This is the original flow and is unchanged by the agent features.
 
 ---
 
@@ -89,10 +89,10 @@ docker compose up -d --build      # serves at http://localhost:3000
 
 `package.json` is used only inside the Docker image — Node/npm are not required on the host.
 
-Both pages work whenever EC2 is reachable — the portfolio APIs, MCP server, and agent are all deployed there. No local server is required.
+All three pages work whenever EC2 is reachable — the portfolio APIs, MCP server, and agent are all deployed there. No local server is required.
 
 ---
 
 ## Separation of concerns
 
-The chat feature follows the same client/server split as the rest of the project: the UI lives here (frontend), and the agent server lives in [apira-agent](https://github.com/KMeltzer24/apira-agent) (backend). The frontend only ever speaks HTTP to its backends; it contains no agent, model, or MCP logic.
+Agent Chat and the Recommender follow the same client/server split as the rest of the project: the UI lives here (frontend), and the agent server lives in [apira-agent](https://github.com/KMeltzer24/apira-agent) (backend). The frontend only ever speaks HTTP to its backends; it contains no agent, model, or MCP logic.
