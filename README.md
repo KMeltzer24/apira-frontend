@@ -4,7 +4,7 @@ React (Vite) web app for the [Apira](https://github.com/KMeltzer24/apira) backen
 
 - **Portfolio** — login + portfolio screens that call the EC2-hosted User Service and Portfolio Service over HTTP.
 - **Agent Chat** — an input/output chat box that talks to the [apira-agent](https://github.com/KMeltzer24/apira-agent) API (a LangGraph agent), deployed on EC2 (port 8100).
-- **Recommender** — triggers stock recommendations via the same agent API; the agent reads EC2 research files and suggests hold/add/trim actions.
+- **Recommender** — triggers stock recommendations via the agent API; choose **local folder** or **vector DB (pgvector)** search with radio buttons.
 
 Runs on your Mac in Docker. The portfolio APIs and the agent both run on EC2 — there is no local backend.
 

@@ -73,7 +73,12 @@ The frontend has no knowledge of how the agent produces its answer — it sends 
 
 ## Stock Recommender view
 
-`StockRecommenderScreen` collects username and password. On submit it sends one `POST /chat` request with a structured prompt that tells the agent to log in, fetch the portfolio, call `searchLocalFolder` on EC2 research files, and return hold/add/trim recommendations.
+`StockRecommenderScreen` collects username, password, and a **research search mode** (radio buttons):
+
+- **Local folder** — agent uses `searchLocalFolder` only
+- **Vector DB** — agent uses `searchVectorDB` only (pgvector on RDS)
+
+On submit it sends one `POST /chat` request with a structured prompt that tells the agent which tool to use, then log in, fetch the portfolio, and return hold/add/trim recommendations.
 
 Like Agent Chat, this view is independent of the Portfolio tab — credentials are entered here, not reused from a Portfolio login session.
 

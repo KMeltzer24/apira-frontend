@@ -4,11 +4,17 @@ const USER_SERVICE_URL = import.meta.env.VITE_USER_SERVICE_URL
 const PORTFOLIO_SERVICE_URL = import.meta.env.VITE_PORTFOLIO_SERVICE_URL
 const AGENT_URL = import.meta.env.VITE_AGENT_URL
 
-function buildRecommendationPrompt(username, password) {
+function buildRecommendationPrompt(username, password, searchMode) {
+  const researchTool =
+    searchMode === 'vector'
+      ? 'Use searchVectorDB only for research (do NOT use searchLocalFolder).'
+      : 'Use searchLocalFolder only for research (do NOT use searchVectorDB).'
+
   return (
     `Log in as user '${username}' with password '${password}'. ` +
     `Retrieve their portfolio holdings. ` +
-    `Use searchLocalFolder to find stock research files for each ticker. ` +
+    `${researchTool} ` +
+    `Search for research on each ticker in the portfolio. ` +
     `Respond with one entry per holding, in this exact format:\n\n` +
     `**TICKER (Company)** — Hold / Add / Trim\n` +
     `Files: filename1, filename2\n` +
@@ -155,6 +161,7 @@ function PortfolioScreen({ user, onLogout }) {
 function StockRecommenderScreen() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [searchMode, setSearchMode] = useState('local')
   const [reply, setReply] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -170,7 +177,7 @@ function StockRecommenderScreen() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: buildRecommendationPrompt(username, password),
+          message: buildRecommendationPrompt(username, password, searchMode),
         }),
       })
       if (!res.ok) throw new Error(`Request failed (${res.status})`)
@@ -200,10 +207,33 @@ function StockRecommenderScreen() {
     <div className="card">
       <h1>Stock Recommender</h1>
       <p className="hint">
-        The agent logs in, reads your portfolio, searches EC2 research files,
-        and recommends hold / add / trim actions.
+        The agent logs in, reads your portfolio, searches research via the mode
+        you select, and recommends hold / add / trim actions.
       </p>
       <form className="form" onSubmit={handleSubmit}>
+        <fieldset className="field radio-group">
+          <legend>Research search</legend>
+          <label className="radio-option">
+            <input
+              type="radio"
+              name="searchMode"
+              value="local"
+              checked={searchMode === 'local'}
+              onChange={() => setSearchMode('local')}
+            />
+            Local folder (searchLocalFolder)
+          </label>
+          <label className="radio-option">
+            <input
+              type="radio"
+              name="searchMode"
+              value="vector"
+              checked={searchMode === 'vector'}
+              onChange={() => setSearchMode('vector')}
+            />
+            Vector DB (searchVectorDB / pgvector)
+          </label>
+        </fieldset>
         <label className="field">
           <span>Username</span>
           <input
