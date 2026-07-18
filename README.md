@@ -12,7 +12,7 @@ Runs on your Mac in Docker. The portfolio APIs and the agent both run on EC2 —
 
 **Backend repo:** https://github.com/KMeltzer24/apira
 
-**MCP server (separate repo):** [apira-mcp](https://github.com/KMeltzer24/apira-mcp) — AI tool layer on EC2; this frontend calls the APIs directly and does not use MCP.
+**MCP servers:** [apira-mcp](https://github.com/KMeltzer24/apira-mcp) provides backend tools and [apira-rag](https://github.com/KMeltzer24/apira-rag) provides research tools. The frontend talks only to the agent/backend APIs.
 
 **Agent (separate repo):** [apira-agent](https://github.com/KMeltzer24/apira-agent) — powers the Agent Chat and Recommender pages.
 

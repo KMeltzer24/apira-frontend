@@ -82,7 +82,7 @@ On submit it sends one `POST /chat` request with a structured prompt that tells 
 
 Like Agent Chat, this view is independent of the Portfolio tab — credentials are entered here, not reused from a Portfolio login session.
 
-Full feature write-up: [apira-mcp/docs/how-stock-recommender-works.md](https://github.com/KMeltzer24/apira-mcp/blob/main/docs/how-stock-recommender-works.md).
+Full feature write-up: [apira-rag/docs/how-stock-recommender-works.md](https://github.com/KMeltzer24/apira-rag/blob/main/docs/how-stock-recommender-works.md).
 
 ---
 
@@ -94,7 +94,7 @@ docker compose up -d --build      # serves at http://localhost:3000
 
 `package.json` is used only inside the Docker image — Node/npm are not required on the host.
 
-All three pages work whenever EC2 is reachable — the portfolio APIs, MCP server, and agent are all deployed there. No local server is required.
+All three pages work whenever EC2 is reachable — the portfolio APIs, agent, backend MCP, and research MCP are all deployed there. No local server is required.
 
 ---
 
