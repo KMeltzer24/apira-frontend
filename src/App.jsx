@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { apiFetch } from './lib/api.js'
 
 const USER_SERVICE_URL = import.meta.env.VITE_USER_SERVICE_URL
 const PORTFOLIO_SERVICE_URL = import.meta.env.VITE_PORTFOLIO_SERVICE_URL
@@ -48,11 +49,15 @@ function LoginScreen({ onLogin }) {
     setError('')
     setLoading(true)
     try {
-      const res = await fetch(`${USER_SERVICE_URL}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      })
+      const res = await apiFetch(
+        `${USER_SERVICE_URL}/login`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        },
+        { service: 'user-service' },
+      )
       if (!res.ok) {
         let message = `Login failed (${res.status})`
         try {
@@ -117,8 +122,10 @@ function PortfolioScreen({ user, onLogout }) {
     setError('')
     setLoading(true)
     try {
-      const res = await fetch(
+      const res = await apiFetch(
         `${PORTFOLIO_SERVICE_URL}/portfolio?user_id=${user.userId}`,
+        {},
+        { service: 'portfolio-service' },
       )
       if (!res.ok) throw new Error(`Request failed (${res.status})`)
       const data = await res.json()
@@ -173,13 +180,17 @@ function StockRecommenderScreen() {
     setReply('')
     setLoading(true)
     try {
-      const res = await fetch(`${AGENT_URL}/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: buildRecommendationPrompt(username, password, searchMode),
-        }),
-      })
+      const res = await apiFetch(
+        `${AGENT_URL}/chat`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: buildRecommendationPrompt(username, password, searchMode),
+          }),
+        },
+        { service: 'agent' },
+      )
       if (!res.ok) throw new Error(`Request failed (${res.status})`)
       const data = await res.json()
       setReply(data.reply)
@@ -288,11 +299,15 @@ function ChatScreen() {
     setReply('')
     setLoading(true)
     try {
-      const res = await fetch(`${AGENT_URL}/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message }),
-      })
+      const res = await apiFetch(
+        `${AGENT_URL}/chat`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message }),
+        },
+        { service: 'agent' },
+      )
       if (!res.ok) throw new Error(`Request failed (${res.status})`)
       const data = await res.json()
       setReply(data.reply)

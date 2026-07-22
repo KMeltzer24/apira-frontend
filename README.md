@@ -16,6 +16,9 @@ Runs on your Mac in Docker. The portfolio APIs and the agent both run on EC2 —
 
 **Agent (separate repo):** [apira-agent](https://github.com/KMeltzer24/apira-agent) — powers the Agent Chat and Recommender pages.
 
+**Logging contract:** [apira/docs/logging.md](https://github.com/KMeltzer24/apira/blob/main/docs/logging.md) — browser JSON events and end-to-end `X-Request-ID` correlation.
+**How it works / demo:** [how-logging-works.md](https://github.com/KMeltzer24/apira/blob/main/docs/how-logging-works.md) · [demo-logging.md](https://github.com/KMeltzer24/apira/blob/main/docs/demo-logging.md).
+
 ## Setup
 
 ```bash
@@ -46,6 +49,8 @@ Open [http://localhost:3000](http://localhost:3000).
 docker compose ps          # status
 docker compose logs -f     # live logs
 docker compose down        # stop
+npm test                   # logging utility tests
+npm run lint               # lint source and tests
 ```
 
 After changing `.env`, rebuild and restart:

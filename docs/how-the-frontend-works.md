@@ -69,6 +69,20 @@ The response shape is `{ "reply": string }`. Loading and error states are handle
 
 The frontend has no knowledge of how the agent produces its answer — it sends text and renders text. The agent (LangGraph + Gemini, calling the MCP tools) lives in [apira-agent](https://github.com/KMeltzer24/apira-agent); this app is just an HTTP client of its `/chat` endpoint.
 
+## Browser logging and request correlation
+
+All API calls go through `src/lib/api.js`. The wrapper generates a new UUID,
+sends it as `X-Request-ID`, measures latency, and emits structured JSON events
+through `src/lib/logger.js`. Uncaught browser errors and rejected promises are
+also logged by handlers registered in `src/main.jsx`.
+
+Logs contain endpoint paths, status codes, durations, service names, and safe
+error types. They never contain passwords, usernames, prompts, replies,
+portfolio data, request/response bodies, query values, or environment secrets.
+Use DevTools Console and the response/request ID to correlate a browser event
+with EC2 container logs. See the canonical
+[logging contract](https://github.com/KMeltzer24/apira/blob/main/docs/logging.md).
+
 ---
 
 ## Stock Recommender view
