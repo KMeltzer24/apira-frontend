@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { apiFetch } from './lib/api.js'
+import { logger, setLogContext, getLogContext } from './lib/logger.js'
 
 const USER_SERVICE_URL = import.meta.env.VITE_USER_SERVICE_URL
 const PORTFOLIO_SERVICE_URL = import.meta.env.VITE_PORTFOLIO_SERVICE_URL
@@ -130,6 +131,13 @@ function PortfolioScreen({ user, onLogout }) {
       if (!res.ok) throw new Error(`Request failed (${res.status})`)
       const data = await res.json()
       setHoldings(data.holdings)
+      logger.info('portfolio_loaded', 'Portfolio holdings loaded in UI', {
+        user_id: user.userId,
+        holdings_count: Array.isArray(data.holdings) ? data.holdings.length : 0,
+        tickers: Array.isArray(data.holdings)
+          ? data.holdings.map((item) => item.ticker).filter(Boolean)
+          : [],
+      })
     } catch (err) {
       setError(err.message || 'Could not reach the portfolio service')
     } finally {
@@ -180,6 +188,28 @@ function StockRecommenderScreen() {
     setReply('')
     setLoading(true)
     try {
+      // Resolve user_id first so Grafana can look up Alice across this whole flow.
+      const loginRes = await apiFetch(
+        `${USER_SERVICE_URL}/login`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        },
+        { service: 'user-service' },
+      )
+      if (!loginRes.ok) {
+        throw new Error(
+          loginRes.status === 401 ? 'Invalid username or password' : 'Login failed',
+        )
+      }
+      const loginData = await loginRes.json()
+      const userId = loginData.user_id
+      setLogContext({ userId })
+      logger.info('recommender_login', 'Recommender resolved user for correlation', {
+        user_id: userId,
+      })
+
       const res = await apiFetch(
         `${AGENT_URL}/chat`,
         {
@@ -187,6 +217,7 @@ function StockRecommenderScreen() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             message: buildRecommendationPrompt(username, password, searchMode),
+            user_id: userId,
           }),
         },
         { service: 'agent' },
@@ -299,12 +330,16 @@ function ChatScreen() {
     setReply('')
     setLoading(true)
     try {
+      const { user_id: userId } = getLogContext()
+      const body = { message }
+      if (userId != null) body.user_id = userId
+
       const res = await apiFetch(
         `${AGENT_URL}/chat`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message }),
+          body: JSON.stringify(body),
         },
         { service: 'agent' },
       )
@@ -365,6 +400,20 @@ export default function App() {
   const [view, setView] = useState('portfolio')
   const [user, setUser] = useState(null)
 
+  const handleLogin = (nextUser) => {
+    setLogContext({ userId: nextUser.userId })
+    logger.info('user_logged_in', 'User signed in', { user_id: nextUser.userId })
+    setUser(nextUser)
+  }
+
+  const handleLogout = () => {
+    logger.info('user_logged_out', 'User signed out', {
+      user_id: user?.userId,
+    })
+    setLogContext({ userId: null })
+    setUser(null)
+  }
+
   if (!USER_SERVICE_URL || !PORTFOLIO_SERVICE_URL) {
     return (
       <div className="app">
@@ -399,9 +448,9 @@ export default function App() {
 
         {view === 'portfolio' ? (
           user ? (
-            <PortfolioScreen user={user} onLogout={() => setUser(null)} />
+            <PortfolioScreen user={user} onLogout={handleLogout} />
           ) : (
-            <LoginScreen onLogin={setUser} />
+            <LoginScreen onLogin={handleLogin} />
           )
         ) : view === 'chat' ? (
           <ChatScreen />

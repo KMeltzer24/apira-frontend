@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { errorMetadata, log, safePath } from './logger.js'
+import { errorMetadata, log, safePath, setLogContext } from './logger.js'
 
 afterEach(() => {
+  setLogContext({ userId: null })
   vi.restoreAllMocks()
 })
 
@@ -52,5 +53,22 @@ describe('logger', () => {
       error_type: 'TypeError',
       error_code: 'NETWORK_ERROR',
     })
+  })
+
+  it('includes user_id context and safe ticker lists', () => {
+    const consoleSpy = vi.spyOn(console, 'info').mockImplementation(() => {})
+
+    setLogContext({ userId: 1 })
+    log('INFO', 'portfolio_loaded', 'Portfolio holdings loaded in UI', {
+      tickers: ['AAPL', 'TSLA'],
+      holdings_count: 2,
+      password: 'secret',
+    })
+
+    const entry = JSON.parse(consoleSpy.mock.calls[0][0])
+    expect(entry.user_id).toBe(1)
+    expect(entry.tickers).toEqual(['AAPL', 'TSLA'])
+    expect(entry.holdings_count).toBe(2)
+    expect(entry).not.toHaveProperty('password')
   })
 })
