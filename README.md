@@ -17,7 +17,7 @@ Runs on your Mac in Docker. The portfolio APIs and the agent both run on EC2 —
 **Agent (separate repo):** [apira-agent](https://github.com/KMeltzer24/apira-agent) — powers the Agent Chat and Recommender pages.
 
 **Logging contract:** [apira/docs/logging.md](https://github.com/KMeltzer24/apira/blob/main/docs/logging.md) — browser JSON events and end-to-end `X-Request-ID` correlation.
-**How it works / demo:** [how-logging-works.md](https://github.com/KMeltzer24/apira/blob/main/docs/how-logging-works.md) · [demo-logging.md](https://github.com/KMeltzer24/apira/blob/main/docs/demo-logging.md).
+**How it works / logging:** [how-logging-works.md](https://github.com/KMeltzer24/apira/blob/main/docs/how-logging-works.md) · [grafana-cloud.md](https://github.com/KMeltzer24/apira/blob/main/docs/grafana-cloud.md).
 
 ## Setup
 
@@ -25,15 +25,16 @@ Runs on your Mac in Docker. The portfolio APIs and the agent both run on EC2 —
 cp .env.example .env
 ```
 
-Edit `.env` and set your EC2 public IP (all three services run on EC2):
+Edit `.env` and set your EC2 public IP (backends + agent + log ingest on EC2):
 
 ```bash
 VITE_USER_SERVICE_URL=http://<EC2_PUBLIC_IP>:8001
 VITE_PORTFOLIO_SERVICE_URL=http://<EC2_PUBLIC_IP>:8002
 VITE_AGENT_URL=http://<EC2_PUBLIC_IP>:8100
+VITE_LOG_SERVICE_URL=http://<EC2_PUBLIC_IP>:8300
 ```
 
-The Agent Chat and Recommender pages call the [apira-agent](https://github.com/KMeltzer24/apira-agent) API on EC2. All pages work as long as EC2 is up; no local server is required.
+The Agent Chat and Recommender pages call the [apira-agent](https://github.com/KMeltzer24/apira-agent) API on EC2. Browser structured logs batch to `log-service` on `:8300` (Grafana Cloud). All pages work as long as EC2 is up; no local backend is required.
 
 ## Run
 
