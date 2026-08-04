@@ -59,7 +59,7 @@ describe('logger', () => {
     const consoleSpy = vi.spyOn(console, 'info').mockImplementation(() => {})
 
     setLogContext({ userId: 1 })
-    log('INFO', 'portfolio_loaded', 'Portfolio holdings loaded in UI', {
+    log('INFO', 'portfolio_loaded', 'Portfolio holdings loaded', {
       tickers: ['AAPL', 'TSLA'],
       holdings_count: 2,
       password: 'secret',

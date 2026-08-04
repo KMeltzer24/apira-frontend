@@ -131,7 +131,7 @@ function PortfolioScreen({ user, onLogout }) {
       if (!res.ok) throw new Error(`Request failed (${res.status})`)
       const data = await res.json()
       setHoldings(data.holdings)
-      logger.info('portfolio_loaded', 'Portfolio holdings loaded in UI', {
+      logger.info('portfolio_loaded', 'Portfolio holdings loaded', {
         user_id: user.userId,
         holdings_count: Array.isArray(data.holdings) ? data.holdings.length : 0,
         tickers: Array.isArray(data.holdings)
@@ -188,7 +188,9 @@ function StockRecommenderScreen() {
     setReply('')
     setLoading(true)
     try {
-      // Resolve user_id first so Grafana can look up Alice across this whole flow.
+      // One request_id for the whole recommender action (login + chat + agent hops).
+      const requestId = crypto.randomUUID()
+
       const loginRes = await apiFetch(
         `${USER_SERVICE_URL}/login`,
         {
@@ -196,7 +198,7 @@ function StockRecommenderScreen() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password }),
         },
-        { service: 'user-service' },
+        { service: 'user-service', requestId },
       )
       if (!loginRes.ok) {
         throw new Error(
@@ -206,8 +208,9 @@ function StockRecommenderScreen() {
       const loginData = await loginRes.json()
       const userId = loginData.user_id
       setLogContext({ userId })
-      logger.info('recommender_login', 'Recommender resolved user for correlation', {
+      logger.info('recommender_login', 'Recommender login succeeded', {
         user_id: userId,
+        request_id: requestId,
       })
 
       const res = await apiFetch(
@@ -220,7 +223,7 @@ function StockRecommenderScreen() {
             user_id: userId,
           }),
         },
-        { service: 'agent' },
+        { service: 'agent', requestId },
       )
       if (!res.ok) throw new Error(`Request failed (${res.status})`)
       const data = await res.json()
