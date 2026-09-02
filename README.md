@@ -2,11 +2,11 @@
 
 React (Vite) web app for the [Apira](https://github.com/KMeltzer24/apira) backend. Three pages:
 
-- **Portfolio** — login + portfolio screens that call the EC2-hosted User Service and Portfolio Service over HTTP.
-- **Agent Chat** — an input/output chat box that talks to the [apira-agent](https://github.com/KMeltzer24/apira-agent) API (a LangGraph agent), deployed on EC2 (port 8100).
-- **Recommender** — triggers stock recommendations via the agent API; choose **local folder** or **vector DB (pgvector)** search with radio buttons.
+- **Portfolio** — login + holdings via user-service and portfolio-service (`localhost` or EC2).
+- **Agent Chat** — talks to [apira-agent](https://github.com/KMeltzer24/apira-agent) (LangGraph supervisor + specialists) on port 8100.
+- **Recommender** — same agent API; choose **local folder** or **vector DB (pgvector)**.
 
-Runs on your Mac in Docker. The portfolio APIs and the agent both run on EC2 — there is no local backend.
+Runs on your Mac in Docker. Point `.env` at local backends ([apira run-locally.md](https://github.com/KMeltzer24/apira/blob/main/docs/run-locally.md)) or at EC2.
 
 **How it works:** [docs/how-the-frontend-works.md](docs/how-the-frontend-works.md) — the three pages and how each talks to its server.
 
@@ -14,7 +14,7 @@ Runs on your Mac in Docker. The portfolio APIs and the agent both run on EC2 —
 
 **MCP servers:** [apira-mcp](https://github.com/KMeltzer24/apira-mcp) provides backend tools and [apira-rag](https://github.com/KMeltzer24/apira-rag) provides research tools. The frontend talks only to the agent/backend APIs.
 
-**Agent (separate repo):** [apira-agent](https://github.com/KMeltzer24/apira-agent) — powers the Agent Chat and Recommender pages.
+**Agent (separate repo):** [apira-agent](https://github.com/KMeltzer24/apira-agent) — LangGraph supervisor graph; powers Agent Chat and Recommender. Both tabs `POST /chat`; the supervisor routes to specialists.
 
 **Logging contract:** [apira/docs/logging.md](https://github.com/KMeltzer24/apira/blob/main/docs/logging.md) — browser JSON events and end-to-end `X-Request-ID` correlation.
 **How it works / logging:** [how-logging-works.md](https://github.com/KMeltzer24/apira/blob/main/docs/how-logging-works.md) · [grafana-cloud.md](https://github.com/KMeltzer24/apira/blob/main/docs/grafana-cloud.md).
@@ -25,16 +25,9 @@ Runs on your Mac in Docker. The portfolio APIs and the agent both run on EC2 —
 cp .env.example .env
 ```
 
-Edit `.env` and set your EC2 public IP (backends + agent + log ingest on EC2):
+Copy `.env.example` to `.env`. For local backends use `localhost` (see [apira run-locally.md](https://github.com/KMeltzer24/apira/blob/main/docs/run-locally.md)). Rebuild after changing `VITE_*`.
 
-```bash
-VITE_USER_SERVICE_URL=http://<EC2_PUBLIC_IP>:8001
-VITE_PORTFOLIO_SERVICE_URL=http://<EC2_PUBLIC_IP>:8002
-VITE_AGENT_URL=http://<EC2_PUBLIC_IP>:8100
-VITE_LOG_SERVICE_URL=http://<EC2_PUBLIC_IP>:8300
-```
-
-The Agent Chat and Recommender pages call the [apira-agent](https://github.com/KMeltzer24/apira-agent) API on EC2. Browser structured logs batch to `log-service` on `:8300` (Grafana Cloud). All pages work as long as EC2 is up; no local backend is required.
+Browser logs go to `VITE_LOG_SERVICE_URL` (`:8300`) → Grafana Cloud Loki.
 
 ## Run
 

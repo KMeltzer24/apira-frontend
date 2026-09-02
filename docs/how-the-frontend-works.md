@@ -4,9 +4,9 @@ A React (Vite) single-page app with three views selected by a top nav bar. Each 
 
 | View | Purpose | Backend | Transport |
 |------|---------|---------|-----------|
-| **Portfolio** | Login, then list holdings | EC2 user-service (`:8001`), portfolio-service (`:8002`) | REST/JSON |
-| **Agent Chat** | Send a prompt, render the reply | apira-agent API on EC2 (`:8100`) | REST/JSON |
-| **Recommender** | Trigger stock recommendations | apira-agent API on EC2 (`:8100`) | REST/JSON |
+| **Portfolio** | Login, then list holdings | user-service (`:8001`), portfolio-service (`:8002`) | REST/JSON |
+| **Agent Chat** | Send a prompt, render the reply | apira-agent API (`:8100`) | REST/JSON |
+| **Recommender** | Trigger stock recommendations | apira-agent API (`:8100`) | REST/JSON |
 
 ---
 
@@ -25,19 +25,24 @@ Components:
 | `PortfolioScreen` | `GET /portfolio?user_id=`, render holdings |
 | `ChatScreen` | `POST /chat`, render the agent's reply |
 | `StockRecommenderScreen` | `POST /chat` with a structured recommendation prompt |
-| `ConfigError` | Shown if the EC2 service URLs are missing |
+| `ConfigError` | Shown if the service URLs are missing |
 
 ## Configuration
 
 Service URLs are injected at build time from `.env` via Vite's `import.meta.env`:
 
 ```bash
-VITE_USER_SERVICE_URL=http://<EC2_PUBLIC_IP>:8001
-VITE_PORTFOLIO_SERVICE_URL=http://<EC2_PUBLIC_IP>:8002
-VITE_AGENT_URL=http://<EC2_PUBLIC_IP>:8100
+# Local (apira/docs/run-locally.md)
+VITE_USER_SERVICE_URL=http://localhost:8001
+VITE_PORTFOLIO_SERVICE_URL=http://localhost:8002
+VITE_AGENT_URL=http://localhost:8100
+VITE_LOG_SERVICE_URL=http://localhost:8300
+
+# Or EC2
+# VITE_USER_SERVICE_URL=http://<EC2_PUBLIC_IP>:8001
 ```
 
-All three point at EC2: the agent is deployed there too (it uses the Gemini API, so it needs no local model).
+Vite bakes `VITE_*` at **image build** time. Rebuild after changing `.env`. For local work see [apira: run-locally.md](https://github.com/KMeltzer24/apira/blob/main/docs/run-locally.md).
 
 ---
 
@@ -67,7 +72,7 @@ setReply(data.reply)
 
 The response shape is `{ "reply": string }`. Loading and error states are handled locally in the component. If `VITE_AGENT_URL` is unset, the view renders a configuration hint instead of the form.
 
-The frontend has no knowledge of how the agent produces its answer — it sends text and renders text. The agent (LangGraph + Gemini, calling the MCP tools) lives in [apira-agent](https://github.com/KMeltzer24/apira-agent); this app is just an HTTP client of its `/chat` endpoint.
+The frontend has no knowledge of how the agent produces its answer — it sends text and renders text. [apira-agent](https://github.com/KMeltzer24/apira-agent) is a LangGraph supervisor (the chat agent) plus portfolio and research specialists that call MCP tools; this app is just an HTTP client of `/chat`.
 
 ## Browser logging and request correlation
 
@@ -92,7 +97,7 @@ with EC2 container logs. See the canonical
 - **Local folder** — agent uses `searchLocalFolder` only
 - **Vector DB** — agent uses `searchVectorDB` only (pgvector on RDS)
 
-On submit it sends one `POST /chat` request with a structured prompt that tells the agent which tool to use, then log in, fetch the portfolio, and return hold/add/trim recommendations.
+On submit it sends one `POST /chat` request with a structured prompt that tells the agent which research tool to use, then log in, fetch the portfolio, and return hold/add/trim recommendations. The supervisor typically runs the **portfolio** specialist then the **research** specialist; the frontend still only sees `{ reply }`.
 
 Like Agent Chat, this view is independent of the Portfolio tab — credentials are entered here, not reused from a Portfolio login session.
 
@@ -108,7 +113,7 @@ docker compose up -d --build      # serves at http://localhost:3000
 
 `package.json` is used only inside the Docker image — Node/npm are not required on the host.
 
-All three pages work whenever EC2 is reachable — the portfolio APIs, agent, backend MCP, and research MCP are all deployed there. No local server is required.
+All three pages work when the URLs in `.env` are reachable — local Compose ([apira run-locally.md](https://github.com/KMeltzer24/apira/blob/main/docs/run-locally.md)) or EC2.
 
 ---
 
