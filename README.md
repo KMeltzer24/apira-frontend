@@ -2,11 +2,11 @@
 
 React (Vite) web app for the [Apira](https://github.com/KMeltzer24/apira) backend. Three pages:
 
-- **Portfolio** — login + holdings via user-service and portfolio-service (`localhost` or EC2).
+- **Portfolio** — login + holdings via user-service and portfolio-service on `localhost`.
 - **Agent Chat** — talks to [apira-agent](https://github.com/KMeltzer24/apira-agent) (LangGraph supervisor + specialists) on port 8100.
 - **Recommender** — same agent API; choose **local folder** or **vector DB (pgvector)**.
 
-Runs on your Mac in Docker. Point `.env` at local backends ([apira run-locally.md](https://github.com/KMeltzer24/apira/blob/main/docs/run-locally.md)) or at EC2.
+Runs on your Mac in Docker. Point `.env` at local backends ([apira run-locally.md](https://github.com/KMeltzer24/apira/blob/main/docs/run-locally.md)).
 
 **How it works:** [docs/how-the-frontend-works.md](docs/how-the-frontend-works.md) — the three pages and how each talks to its server.
 

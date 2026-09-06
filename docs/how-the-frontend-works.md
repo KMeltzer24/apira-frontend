@@ -37,9 +37,6 @@ VITE_USER_SERVICE_URL=http://localhost:8001
 VITE_PORTFOLIO_SERVICE_URL=http://localhost:8002
 VITE_AGENT_URL=http://localhost:8100
 VITE_LOG_SERVICE_URL=http://localhost:8300
-
-# Or EC2
-# VITE_USER_SERVICE_URL=http://<EC2_PUBLIC_IP>:8001
 ```
 
 Vite bakes `VITE_*` at **image build** time. Rebuild after changing `.env`. For local work see [apira: run-locally.md](https://github.com/KMeltzer24/apira/blob/main/docs/run-locally.md).
@@ -85,7 +82,7 @@ Logs contain endpoint paths, status codes, durations, service names, and safe
 error types. They never contain passwords, usernames, prompts, replies,
 portfolio data, request/response bodies, query values, or environment secrets.
 Use DevTools Console and the response/request ID to correlate a browser event
-with EC2 container logs. See the canonical
+with local container logs. See the canonical
 [logging contract](https://github.com/KMeltzer24/apira/blob/main/docs/logging.md).
 
 ---
@@ -95,7 +92,7 @@ with EC2 container logs. See the canonical
 `StockRecommenderScreen` collects username, password, and a **research search mode** (radio buttons):
 
 - **Local folder** — agent uses `searchLocalFolder` only
-- **Vector DB** — agent uses `searchVectorDB` only (pgvector on RDS)
+- **Vector DB** — agent uses `searchVectorDB` only (pgvector on local Postgres)
 
 On submit it sends one `POST /chat` request with a structured prompt that tells the agent which research tool to use, then log in, fetch the portfolio, and return hold/add/trim recommendations. The supervisor typically runs the **portfolio** specialist then the **research** specialist; the frontend still only sees `{ reply }`.
 
@@ -113,7 +110,7 @@ docker compose up -d --build      # serves at http://localhost:3000
 
 `package.json` is used only inside the Docker image — Node/npm are not required on the host.
 
-All three pages work when the URLs in `.env` are reachable — local Compose ([apira run-locally.md](https://github.com/KMeltzer24/apira/blob/main/docs/run-locally.md)) or EC2.
+All three pages work when the URLs in `.env` are reachable — local Compose ([apira run-locally.md](https://github.com/KMeltzer24/apira/blob/main/docs/run-locally.md)).
 
 ---
 

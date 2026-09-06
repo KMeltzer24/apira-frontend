@@ -32,7 +32,7 @@ function ConfigError() {
       <p className="error">
         Copy <code>.env.example</code> to <code>.env</code> and set{' '}
         <code>VITE_USER_SERVICE_URL</code> and{' '}
-        <code>VITE_PORTFOLIO_SERVICE_URL</code> to your EC2 backend URLs, then
+        <code>VITE_PORTFOLIO_SERVICE_URL</code> to your local backend URLs, then
         run <code>docker compose up -d --build</code>.
       </p>
     </div>
@@ -241,7 +241,7 @@ function StockRecommenderScreen() {
         <h1>Stock Recommender</h1>
         <p className="error">
           Set <code>VITE_AGENT_URL</code> in <code>.env</code> to the agent API
-          (e.g. <code>http://&lt;EC2_PUBLIC_IP&gt;:8100</code>) and redeploy the
+          (e.g. <code>http://localhost:8100</code>) and rebuild the
           frontend.
         </p>
       </div>
