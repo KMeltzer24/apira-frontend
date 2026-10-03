@@ -69,7 +69,7 @@ setReply(data.reply)
 
 The response shape is `{ "reply": string }`. Loading and error states are handled locally in the component. If `VITE_AGENT_URL` is unset, the view renders a configuration hint instead of the form.
 
-The frontend has no knowledge of how the agent produces its answer — it sends text and renders text. [apira-agent](https://github.com/KMeltzer24/apira-agent) is a LangGraph supervisor (the chat agent) plus portfolio and research specialists that call MCP tools; this app is just an HTTP client of `/chat`.
+The frontend has no knowledge of how the agent produces its answer — it sends text and renders text. [apira-agent](https://github.com/KMeltzer24/apira-agent) is a LangGraph **supervisor** on `:8100` that discovers **portfolio** (`:8110`) and **research** (`:8120`) over A2A. This app has no `GOOGLE_API_KEY`; it is only an HTTP client of `/chat`.
 
 ## Browser logging and request correlation
 
@@ -94,7 +94,7 @@ with local container logs. See the canonical
 - **Local folder** — agent uses `searchLocalFolder` only
 - **Vector DB** — agent uses `searchVectorDB` only (pgvector on local Postgres)
 
-On submit it sends one `POST /chat` request with a structured prompt that tells the agent which research tool to use, then log in, fetch the portfolio, and return hold/add/trim recommendations. The supervisor typically runs the **portfolio** specialist then the **research** specialist; the frontend still only sees `{ reply }`.
+On submit it sends one `POST /chat` request with a structured prompt that tells the agent which research tool to use, then log in, fetch the portfolio, and return hold/add/trim recommendations. The supervisor typically **calls** the **portfolio** container then the **research** container; the frontend still only sees `{ reply }`.
 
 Like Agent Chat, this view is independent of the Portfolio tab — credentials are entered here, not reused from a Portfolio login session.
 
@@ -116,4 +116,4 @@ All three pages work when the URLs in `.env` are reachable — local Compose ([a
 
 ## Separation of concerns
 
-Agent Chat and the Recommender follow the same client/server split as the rest of the project: the UI lives here (frontend), and the agent server lives in [apira-agent](https://github.com/KMeltzer24/apira-agent) (backend). The frontend only ever speaks HTTP to its backends; it contains no agent, model, or MCP logic.
+Agent Chat and the Recommender follow the same client/server split as the rest of the project: the UI lives here (frontend), and the **supervisor** lives in [apira-agent](https://github.com/KMeltzer24/apira-agent) (`:8100`). Portfolio and research are other containers in that repo. The frontend only ever speaks HTTP to `POST /chat`; it contains no agent, model, MCP, or A2A logic.
