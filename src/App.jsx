@@ -378,7 +378,7 @@ function ChatScreen() {
             className="chat-input"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="e.g. Log in as alice (password: password) and show my portfolio"
+            placeholder="e.g. Log in as alice and show my portfolio"
             rows={3}
             autoFocus
           />
