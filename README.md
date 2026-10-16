@@ -4,7 +4,7 @@
 [![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/compose/)
 
-React UI for Apira (**Portfolio**, **Agent Chat**, **Stock Recommender**). Chat goes to the LangGraph supervisor; MCP/RAG stay on the agent side.
+React UI for **Apira** (AI Portfolio Intelligence Research Assistant): **Portfolio**, **Agent Chat**, **Stock Recommender**. Chat goes to the LangGraph supervisor; MCP/RAG stay on the agent side.
 
 Apira is four repos. **Clone + run order:** [apira README](https://github.com/KMeltzer24/apira). Start this repo last.
 
